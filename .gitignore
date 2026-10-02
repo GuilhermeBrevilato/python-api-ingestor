@@ -1,0 +1,13 @@
+# Ambiente virtual
+.venv/
+
+# Arquivos gerados pelo Python
+__pycache__/
+*.py[cod]
+
+# Configurações locais com possíveis credenciais
+.env
+.env.*
+
+# Arquivos do macOS
+.DS_Store
