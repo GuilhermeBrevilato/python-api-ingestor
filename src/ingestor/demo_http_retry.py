@@ -141,10 +141,12 @@ async def extrair_com_retry(
         client: httpx.AsyncClient,
         url: str,
 ) -> dict | list:
-    total_tentativas = 2
+    total_tentativas = 3
+    pausa_inicial = 1
 
     for tentativa in range(total_tentativas):
         numero_tentativa = tentativa + 1
+        espera_calculada = pausa_inicial * (2 ** tentativa)
 
         try:
             resposta = await client.get(url)
@@ -204,23 +206,21 @@ async def extrair_com_retry(
                 total_tentativas,
             )
 
-            await asyncio.sleep(1.0)
+            logger.info(
+                "AGUARDANDO RETRY | espera=%.1f segundos",
+                espera_calculada,
+            )
+
+            await asyncio.sleep(espera_calculada)
 
 
 
 async def main() -> None:
 
     await testar_cenario(
-        ["connect_timeout", 200],
-        ["connect_timeout", 200],
+        ["connect_timeout", "connect_timeout", 200],
+        ["connect_timeout", "connect_timeout", 200],
         False,
-    )
-
-    await testar_cenario(
-        ["connect_timeout", "connect_timeout"],
-        ["connect_timeout", "connect_timeout"],
-        True,
-        httpx.ConnectTimeout,
     )
 
 if __name__=="__main__":
