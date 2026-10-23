@@ -152,6 +152,10 @@ async def extrair_com_retry(
         espera_limitada = min(espera_calculada, espera_maxima)
         espera = random.uniform(0.0, espera_limitada)
 
+        assert 0.0 <= espera <= espera_limitada, (
+            "Espera fora do intervalo permitido"
+        )
+
         try:
             resposta = await client.get(url)
             resposta.raise_for_status()
