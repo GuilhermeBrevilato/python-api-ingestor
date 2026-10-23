@@ -3,6 +3,7 @@ import json
 import logging
 
 import httpx
+import random
 
 logging.basicConfig(
     level=logging.INFO,
@@ -149,6 +150,7 @@ async def extrair_com_retry(
         numero_tentativa = tentativa + 1
         espera_calculada = pausa_inicial * (2 ** tentativa)
         espera_limitada = min(espera_calculada, espera_maxima)
+        espera = random.uniform(0.0, espera_limitada)
 
         try:
             resposta = await client.get(url)
@@ -209,12 +211,13 @@ async def extrair_com_retry(
             )
 
             logger.info(
-                "AGUARDANDO RETRY | calculada=%.1f | limitada=%.1f segundos",
+                "AGUARDANDO RETRY | calculada=%.1f | limitada=%.1f | sorteada=%.2f segundos",
                 espera_calculada,
                 espera_limitada,
+                espera,
             )
 
-            await asyncio.sleep(espera_limitada)
+            await asyncio.sleep(espera)
 
 
 
