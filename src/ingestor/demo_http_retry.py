@@ -1,9 +1,9 @@
 import asyncio
 import json
 import logging
+import random
 
 import httpx
-import random
 
 logging.basicConfig(
     level=logging.INFO,
@@ -26,6 +26,15 @@ async def testar_cenario(status_planejados, chamadas_esperadas, deve_falhar: boo
 
     chamadas_planejadas = iter(status_planejados)
     chamadas_realizadas = []
+    esperas_realizadas =[]
+
+    async def simular_espera(segundos):
+        esperas_realizadas.append(segundos)
+
+        logger.info(
+            "ESPERA SIMULADA | segundos=%.2f",
+            segundos,
+        )
 
     def simular_api(
             request: httpx.Request,
@@ -34,7 +43,7 @@ async def testar_cenario(status_planejados, chamadas_esperadas, deve_falhar: boo
         chamadas_realizadas.append(status)
 
         logger.info(
-            "CONSULTA SIMULADA | method=%s | diretório=%s",
+            "CONSULTA SIMULADA | method=%s | endpoint=%s",
             request.method,
             request.url.path,
         )
@@ -88,6 +97,7 @@ async def testar_cenario(status_planejados, chamadas_esperadas, deve_falhar: boo
             dados = await extrair_com_retry(
                 client, 
                 "https://api.exemplo.test/transacoes",
+                aguardar=simular_espera,
             )
             logger.info(
                 "CONSULTAS CONCLUIDAS | dados=%s",
@@ -141,6 +151,7 @@ async def testar_cenario(status_planejados, chamadas_esperadas, deve_falhar: boo
 async def extrair_com_retry(
         client: httpx.AsyncClient,
         url: str,
+        aguardar,
 ) -> dict | list:
     total_tentativas = 3
     pausa_inicial = 1
@@ -196,7 +207,7 @@ async def extrair_com_retry(
                 espera,
             )
 
-            await asyncio.sleep(espera)
+            await aguardar(espera)
 
         except json.JSONDecodeError:
             logger.error(
@@ -228,7 +239,7 @@ async def extrair_com_retry(
                 espera,
             )
 
-            await asyncio.sleep(espera)
+            await aguardar(espera)
 
 
 
