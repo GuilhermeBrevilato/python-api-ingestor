@@ -234,5 +234,12 @@ async def main() -> None:
         httpx.ConnectTimeout,
     )
 
+    await testar_cenario(
+        [404, 200],
+        [404],
+        True,
+        httpx.HTTPStatusError,
+    )
+
 if __name__=="__main__":
     asyncio.run(main())
