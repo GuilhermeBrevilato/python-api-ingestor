@@ -22,7 +22,13 @@ STATUS_RETRY = {
     503,
 }
 
-async def testar_cenario(status_planejados, chamadas_esperadas, deve_falhar: bool, excecao_esperada=None):
+async def testar_cenario(
+        status_planejados, 
+        chamadas_esperadas, 
+        deve_falhar: bool, 
+        excecao_esperada=None,
+        quantidade_esperas_esperadas=None,
+        ):
 
     chamadas_planejadas = iter(status_planejados)
     chamadas_realizadas = []
@@ -143,6 +149,9 @@ async def testar_cenario(status_planejados, chamadas_esperadas, deve_falhar: boo
 
         assert chamadas_realizadas == chamadas_esperadas, "chamadas realizadas não condizentes com o planejado"
 
+        if quantidade_esperas_esperadas is not None:
+            assert len(esperas_realizadas) == quantidade_esperas_esperadas, "Quantidade de esperas diferente do esperado"
+
         logger.info(
             "VERIFICACAO PASSOU."
         )
@@ -250,6 +259,7 @@ async def main() -> None:
         ["connect_timeout", "connect_timeout", "connect_timeout"],
         True,
         httpx.ConnectTimeout,
+        quantidade_esperas_esperadas=2,
     )
 
     await testar_cenario(
