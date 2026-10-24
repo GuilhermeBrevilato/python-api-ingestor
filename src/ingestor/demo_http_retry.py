@@ -124,7 +124,7 @@ async def testar_cenario(status_planejados, chamadas_esperadas, deve_falhar: boo
             assert isinstance(erro, excecao_esperada), "Excecao diferente do esperado"
 
             logger.info(
-                "FALHA ESPERADA RECEBIDA | motivo=%s de leitura",
+                "FALHA ESPERADA RECEBIDA | motivo=%s",
                 erro,
             )
         else:
@@ -228,9 +228,10 @@ async def extrair_com_retry(
 async def main() -> None:
 
     await testar_cenario(
-        ["connect_timeout", "connect_timeout", 200],
-        ["connect_timeout", "connect_timeout", 200],
-        False,
+        ["connect_timeout", "connect_timeout", "connect_timeout"],
+        ["connect_timeout", "connect_timeout", "connect_timeout"],
+        True,
+        httpx.ConnectTimeout,
     )
 
 if __name__=="__main__":
