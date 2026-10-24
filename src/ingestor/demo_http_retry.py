@@ -267,12 +267,14 @@ async def main() -> None:
         [404],
         True,
         httpx.HTTPStatusError,
+        quantidade_esperas_esperadas=0,
     )
 
     await testar_cenario(
         [503, 503, 200],
         [503, 503, 200],
         False,
+        quantidade_esperas_esperadas=2,
     )
 
 if __name__=="__main__":
