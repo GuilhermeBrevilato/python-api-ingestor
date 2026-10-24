@@ -189,7 +189,14 @@ async def extrair_com_retry(
                 total_tentativas,
             )
 
-            await asyncio.sleep(1.0)
+            logger.info(
+                "AGUARDANDO RETRY | calculada=%.1f | limitada=%.1f | sorteada=%.2f segundos",
+                espera_calculada,
+                espera_limitada,
+                espera,
+            )
+
+            await asyncio.sleep(espera)
 
         except json.JSONDecodeError:
             logger.error(
@@ -239,6 +246,12 @@ async def main() -> None:
         [404],
         True,
         httpx.HTTPStatusError,
+    )
+
+    await testar_cenario(
+        [503, 503, 200],
+        [503, 503, 200],
+        False,
     )
 
 if __name__=="__main__":
