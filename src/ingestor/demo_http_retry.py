@@ -27,7 +27,6 @@ async def testar_cenario(
         chamadas_esperadas, 
         deve_falhar: bool, 
         excecao_esperada=None,
-        quantidade_esperas_esperadas=None,
         esperas_esperadas=None,
         ):
 
@@ -154,8 +153,6 @@ async def testar_cenario(
 
         assert chamadas_realizadas == chamadas_esperadas, "chamadas realizadas não condizentes com o planejado"
 
-        if quantidade_esperas_esperadas is not None:
-            assert len(esperas_realizadas) == quantidade_esperas_esperadas, "Quantidade de esperas diferente do esperado"
 
         if esperas_esperadas is not None:
             assert esperas_realizadas == esperas_esperadas, (
@@ -271,7 +268,6 @@ async def main() -> None:
         ["connect_timeout", "connect_timeout", "connect_timeout"],
         True,
         httpx.ConnectTimeout,
-        quantidade_esperas_esperadas=2,
         esperas_esperadas=[1.0, 1.5],
     )
 
@@ -280,7 +276,6 @@ async def main() -> None:
         [404],
         True,
         httpx.HTTPStatusError,
-        quantidade_esperas_esperadas=0,
         esperas_esperadas=[],
     )
 
@@ -288,7 +283,6 @@ async def main() -> None:
         [503, 503, 200],
         [503, 503, 200],
         False,
-        quantidade_esperas_esperadas=2,
         esperas_esperadas=[1.0, 1.5],
     )
 
