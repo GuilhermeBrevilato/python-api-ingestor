@@ -34,6 +34,9 @@ async def testar_cenario(
     chamadas_realizadas = []
     esperas_realizadas =[]
 
+    def escolher_limite_superior(minimo, maximo):
+        return maximo
+
     async def simular_espera(segundos):
         esperas_realizadas.append(segundos)
 
@@ -104,6 +107,7 @@ async def testar_cenario(
                 client, 
                 "https://api.exemplo.test/transacoes",
                 aguardar=simular_espera,
+                sortear=escolher_limite_superior,
             )
             logger.info(
                 "CONSULTAS CONCLUIDAS | dados=%s",
@@ -161,6 +165,7 @@ async def extrair_com_retry(
         client: httpx.AsyncClient,
         url: str,
         aguardar,
+        sortear,
 ) -> dict | list:
     total_tentativas = 3
     pausa_inicial = 1
@@ -170,7 +175,7 @@ async def extrair_com_retry(
         numero_tentativa = tentativa + 1
         espera_calculada = pausa_inicial * (2 ** tentativa)
         espera_limitada = min(espera_calculada, espera_maxima)
-        espera = random.uniform(0.0, espera_limitada)
+        espera = sortear(0.0, espera_limitada)
 
         assert 0.0 <= espera <= espera_limitada, (
             "Espera fora do intervalo permitido"
