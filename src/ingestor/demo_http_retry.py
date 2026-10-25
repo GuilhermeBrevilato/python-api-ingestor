@@ -28,6 +28,7 @@ async def testar_cenario(
         deve_falhar: bool, 
         excecao_esperada=None,
         quantidade_esperas_esperadas=None,
+        esperas_esperadas=None,
         ):
 
     chamadas_planejadas = iter(status_planejados)
@@ -156,6 +157,12 @@ async def testar_cenario(
         if quantidade_esperas_esperadas is not None:
             assert len(esperas_realizadas) == quantidade_esperas_esperadas, "Quantidade de esperas diferente do esperado"
 
+        if esperas_esperadas is not None:
+            assert esperas_realizadas == esperas_esperadas, (
+                f"Esperas diferentes: esperado={esperas_esperadas}, "
+                f"recebido={esperas_realizadas}"
+            )
+
         logger.info(
             "VERIFICACAO PASSOU."
         )
@@ -265,6 +272,7 @@ async def main() -> None:
         True,
         httpx.ConnectTimeout,
         quantidade_esperas_esperadas=2,
+        esperas_esperadas=[1.0, 1.5],
     )
 
     await testar_cenario(
@@ -273,6 +281,7 @@ async def main() -> None:
         True,
         httpx.HTTPStatusError,
         quantidade_esperas_esperadas=0,
+        esperas_esperadas=[],
     )
 
     await testar_cenario(
@@ -280,6 +289,7 @@ async def main() -> None:
         [503, 503, 200],
         False,
         quantidade_esperas_esperadas=2,
+        esperas_esperadas=[1.0, 1.5],
     )
 
 if __name__=="__main__":
