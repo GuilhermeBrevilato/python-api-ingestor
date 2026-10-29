@@ -253,7 +253,7 @@ async def extrair_com_retry(
             logger.info(
                 "AGUARDANDO RETRY | origem=%s | espera=%.2f segundos",
                 origem,
-                segundos,
+                espera,
             )
 
             await aguardar(espera)
@@ -315,6 +315,13 @@ async def main() -> None:
     chamadas_esperadas=[429, 200],
     deve_falhar=False,
     esperas_esperadas=[10],
+    )
+
+    await testar_cenario(
+    status_planejados=[503, 200],
+    chamadas_esperadas=[503, 200],
+    deve_falhar=False,
+    esperas_esperadas=[1.0],
     )
 
 if __name__=="__main__":
