@@ -241,11 +241,19 @@ async def extrair_com_retry(
                 total_tentativas,
             )
 
+            valor = erro.response.headers.get("Retry-After")
+            segundos = interpretar_retry_after_segundos(valor)
+
+            if segundos is not None:
+                espera = segundos
+                origem = "Retry-After"
+            else:
+                origem = "backoff_com_jitter"
+
             logger.info(
-                "AGUARDANDO RETRY | calculada=%.1f | limitada=%.1f | sorteada=%.2f segundos",
-                espera_calculada,
-                espera_limitada,
-                espera,
+                "AGUARDANDO RETRY | origem=%s | espera=%.2f segundos",
+                origem,
+                segundos,
             )
 
             await aguardar(espera)
@@ -300,6 +308,13 @@ async def main() -> None:
     logger.info(
         "LEITURA DO RETRY-AFTER VALIDADA | segundos=%s",
         segundos,
+    )
+
+    await testar_cenario(
+    status_planejados=[429, 200],
+    chamadas_esperadas=[429, 200],
+    deve_falhar=False,
+    esperas_esperadas=[10],
     )
 
 if __name__=="__main__":
