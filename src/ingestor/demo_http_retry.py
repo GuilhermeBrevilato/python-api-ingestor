@@ -22,6 +22,21 @@ STATUS_RETRY = {
     503,
 }
 
+def interpretar_retry_after_segundos(valor):
+
+    if valor is None:
+        return None
+
+    try:
+        segundos = int(valor)
+    except ValueError:
+        return None
+
+    if segundos < 0:
+        return None
+
+    return segundos
+
 async def testar_cenario(
         status_planejados, 
         chamadas_esperadas, 
@@ -262,6 +277,14 @@ async def extrair_com_retry(
 
 
 async def main() -> None:
+
+    assert interpretar_retry_after_segundos("10") == 10
+    assert interpretar_retry_after_segundos("0") == 0
+    assert interpretar_retry_after_segundos(None) is None
+    assert interpretar_retry_after_segundos("aguarde") is None
+    assert interpretar_retry_after_segundos("-5") is None
+
+    logger.info("INTERPRETAÇÃO DE RETRY-AFTER EM SEGUNDOS VALIDADA")
 
     await testar_cenario(
         ["connect_timeout", "connect_timeout", "connect_timeout"],
