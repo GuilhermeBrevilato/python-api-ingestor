@@ -66,12 +66,17 @@ async def testar_cenario(
     ) -> httpx.Response:
         status = next(chamadas_planejadas)
         chamadas_realizadas.append(status)
+        headers = {}
 
+        
         logger.info(
             "CONSULTA SIMULADA | method=%s | endpoint=%s",
             request.method,
             request.url.path,
         )
+
+        if retry_after is not None:
+            headers["Retry-After"] = retry_after
 
         if status == "connect_timeout":
             raise httpx.ConnectTimeout(
@@ -88,7 +93,7 @@ async def testar_cenario(
         if status == "json_invalido":
             return httpx.Response(
                 status_code=200,
-                headers={"Retry-After": retry_after},
+                headers=headers,
                 text="Serviço em manutencao",
             )        
 
@@ -108,14 +113,14 @@ async def testar_cenario(
             if status == 429:
                 return httpx.Response(
                     status_code=429,
-                    headers={"Retry-After": retry_after},
+                    headers=headers,
                     json={"erro": "Muitas consultas em pouco tempo"},
                 )
 
             if status == 503:
                 return httpx.Response(
                     status_code=503,
-                    headers={"Retry-After": retry_after},
+                    headers=headers,
                     json={"message": "Servidor temporariamente indisponivel"},
                 )
             else:
@@ -301,7 +306,7 @@ async def main() -> None:
     chamadas_esperadas=[429, 200],
     deve_falhar=False,
     esperas_esperadas=[1.0],
-    retry_after="aguarde"
+    retry_after="aguardar"
     )
 
 if __name__=="__main__":
