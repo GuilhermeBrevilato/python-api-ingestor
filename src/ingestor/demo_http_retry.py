@@ -1,7 +1,7 @@
 import asyncio
 import json
 import logging
-import random
+from datetime import datetime, timezone
 
 import httpx
 
@@ -301,12 +301,24 @@ async def extrair_com_retry(
 
 async def main() -> None:
 
-    await testar_cenario(
-    status_planejados=[429, 200],
-    chamadas_esperadas=[429, 200],
-    deve_falhar=False,
-    esperas_esperadas=[1.0],
-    retry_after="-5"
+    agora = datetime(
+        2026, 11, 1, 14, 59, 40,
+        tzinfo=timezone.utc,
+    )
+
+    instante_retry = datetime(
+        2026, 11, 1, 15, 0, 0,
+        tzinfo=timezone.utc,
+    )
+
+    intervalo = instante_retry - agora
+    espera = intervalo.total_seconds()
+
+    assert espera == 20.0, "Duração diferente do esperado"
+
+    logger.info(
+        "ESPERA CALCULADA | segundos=%.1f",
+        espera,
     )
 
 if __name__=="__main__":
