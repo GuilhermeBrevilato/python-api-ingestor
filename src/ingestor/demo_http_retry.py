@@ -305,8 +305,8 @@ async def main() -> None:
     status_planejados=[429, 200],
     chamadas_esperadas=[429, 200],
     deve_falhar=False,
-    esperas_esperadas=[1.0],
-    retry_after="aguardar"
+    esperas_esperadas=[0],
+    retry_after="0"
     )
 
 if __name__=="__main__":
