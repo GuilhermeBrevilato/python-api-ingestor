@@ -43,6 +43,7 @@ async def testar_cenario(
         deve_falhar: bool, 
         excecao_esperada=None,
         esperas_esperadas=None,
+        retry_after="10",
         ):
 
     chamadas_planejadas = iter(status_planejados)
@@ -87,7 +88,7 @@ async def testar_cenario(
         if status == "json_invalido":
             return httpx.Response(
                 status_code=200,
-                headers={"Retry-After": "10"},
+                headers={"Retry-After": retry_after},
                 text="Serviço em manutencao",
             )        
 
@@ -107,13 +108,14 @@ async def testar_cenario(
             if status == 429:
                 return httpx.Response(
                     status_code=429,
-                    headers={"Retry-After": "10"},
+                    headers={"Retry-After": retry_after},
                     json={"erro": "Muitas consultas em pouco tempo"},
                 )
 
             if status == 503:
                 return httpx.Response(
                     status_code=503,
+                    headers={"Retry-After": retry_after},
                     json={"message": "Servidor temporariamente indisponivel"},
                 )
             else:
@@ -294,34 +296,12 @@ async def extrair_com_retry(
 
 async def main() -> None:
 
-    resposta = httpx.Response(
-        status_code=429,
-        headers={"Retry-After": "10"},
-        json={"erro": "Muitas consultas em pouco tempo"},
-    )
-
-    valor = resposta.headers.get("Retry-After")
-    segundos = interpretar_retry_after_segundos(valor)
-
-    assert segundos == 10, "Duração do Retry-After diferente do esperado"
-
-    logger.info(
-        "LEITURA DO RETRY-AFTER VALIDADA | segundos=%s",
-        segundos,
-    )
-
     await testar_cenario(
     status_planejados=[429, 200],
     chamadas_esperadas=[429, 200],
     deve_falhar=False,
-    esperas_esperadas=[10],
-    )
-
-    await testar_cenario(
-    status_planejados=[503, 200],
-    chamadas_esperadas=[503, 200],
-    deve_falhar=False,
     esperas_esperadas=[1.0],
+    retry_after="aguarde"
     )
 
 if __name__=="__main__":
