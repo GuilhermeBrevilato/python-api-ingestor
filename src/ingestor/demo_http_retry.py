@@ -1,7 +1,8 @@
 import asyncio
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
+from email.utils import parsedate_to_datetime
 
 import httpx
 
@@ -303,12 +304,22 @@ async def main() -> None:
 
     agora = datetime(
         2026, 11, 1, 14, 59, 40,
-        tzinfo=timezone.utc,
+        tzinfo=UTC,
     )
 
-    instante_retry = datetime(
-        2026, 11, 1, 15, 0, 0,
-        tzinfo=timezone.utc,
+    valor = "Sun, 01 Nov 2026 15:00:00 GMT"
+    instante_retry = parsedate_to_datetime(valor)
+
+    logger.info(
+        "CABEÇALHO RECEBIDO | valor=%r | tipo=%s",
+        valor,
+        type(valor).__name__,
+    )
+
+    logger.info(
+        "DATA INTERPRETADA | valor=%s | tipo=%s",
+        instante_retry,
+        type(instante_retry).__name__,
     )
 
     intervalo = instante_retry - agora
