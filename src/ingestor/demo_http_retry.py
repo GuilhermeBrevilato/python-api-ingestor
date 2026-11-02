@@ -23,6 +23,18 @@ STATUS_RETRY = {
     503,
 }
 
+
+def interpretar_retry_after_data(valor):
+    if valor is None:
+        return None
+
+    try:
+        instante_retry = parsedate_to_datetime(valor)
+    except (ValueError, TypeError, OverflowError):
+        return None
+
+    return instante_retry
+
 def interpretar_retry_after_segundos(valor):
 
     if valor is None:
@@ -302,36 +314,16 @@ async def extrair_com_retry(
 
 async def main() -> None:
 
-    agora = datetime(
-        2026, 11, 1, 15, 0, 5,
-        tzinfo=UTC,
-    )
 
-    valor = "Sun, 01 Nov 2026 15:00:00 GMT"
-    instante_retry = parsedate_to_datetime(valor)
+    resultado = interpretar_retry_after_data("amanhã às quinze")
+
+    assert resultado is None, "Data inválida deveria retornar None"
 
     logger.info(
-        "CABEÇALHO RECEBIDO | valor=%r | tipo=%s",
-        valor,
-        type(valor).__name__,
+        "DATA INVÁLIDA TRATADA | resultado=%s",
+        resultado,
     )
 
-    logger.info(
-        "DATA INTERPRETADA | valor=%s | tipo=%s",
-        instante_retry,
-        type(instante_retry).__name__,
-    )
-
-    segundos_restantes = (instante_retry - agora).total_seconds()
-    espera = max(0.0, segundos_restantes)
-
-    assert espera == 0.0, "Data passada deveria produzir espera zero"
-
-    logger.info(
-        "DATA PASSADA | diferença=%.1f | espera=%.1f segundos",
-        segundos_restantes,
-        espera,
-    )
 
 if __name__=="__main__":
     asyncio.run(main())
