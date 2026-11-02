@@ -303,7 +303,7 @@ async def extrair_com_retry(
 async def main() -> None:
 
     agora = datetime(
-        2026, 11, 1, 14, 59, 40,
+        2026, 11, 1, 15, 0, 5,
         tzinfo=UTC,
     )
 
@@ -322,13 +322,14 @@ async def main() -> None:
         type(instante_retry).__name__,
     )
 
-    intervalo = instante_retry - agora
-    espera = intervalo.total_seconds()
+    segundos_restantes = (instante_retry - agora).total_seconds()
+    espera = max(0.0, segundos_restantes)
 
-    assert espera == 20.0, "Duração diferente do esperado"
+    assert espera == 0.0, "Data passada deveria produzir espera zero"
 
     logger.info(
-        "ESPERA CALCULADA | segundos=%.1f",
+        "DATA PASSADA | diferença=%.1f | espera=%.1f segundos",
+        segundos_restantes,
         espera,
     )
 
