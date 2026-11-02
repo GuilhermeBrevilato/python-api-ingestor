@@ -324,6 +324,23 @@ async def main() -> None:
         resultado,
     )
 
+    resultado = interpretar_retry_after_data(
+        "Sun, 01 Nov 2026 15:00:00 GMT",
+    )
+
+    esperado = datetime(
+        2026, 11, 1, 15, 0, 0,
+
+        tzinfo=UTC,
+    )
+
+    assert resultado == esperado, "Data interpretada diferente do esperado"
+
+    logger.info(
+        "DATA VÁLIDA INTERPRETADA | resultado=%s",
+        resultado,
+    )
+
 
 if __name__=="__main__":
     asyncio.run(main())
