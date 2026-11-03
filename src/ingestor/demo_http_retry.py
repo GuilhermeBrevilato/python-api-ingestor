@@ -60,6 +60,17 @@ def interpretar_retry_after_segundos(valor):
 
     return segundos
 
+def interpretar_retry_after(
+        valor: str,
+        agora: datetime,
+) -> int:
+    segundos = interpretar_retry_after_segundos(valor)
+
+    if segundos is not None:
+        return segundos
+
+    return calcular_espera_retry_after_data(valor, agora)
+
 async def testar_cenario(
         status_planejados, 
         chamadas_esperadas, 
@@ -324,35 +335,24 @@ async def extrair_com_retry(
 
 async def main() -> None:
     
-    agora_apos_retry = datetime(
-        2026, 11, 1, 15, 0, 5,
+    agora = datetime(
+        2026, 11, 1, 14, 59, 40,
         tzinfo=UTC,
     )
 
-    espera_passada = calcular_espera_retry_after_data(
+    assert interpretar_retry_after("10", agora) == 10
+    assert interpretar_retry_after("0", agora) == 0
+
+    assert interpretar_retry_after(
         "Sun, 01 Nov 2026 15:00:00 GMT",
-        agora_apos_retry,
-    )
+        agora,
+    ) == 20.0
 
-    assert espera_passada == 0.0, "Espera diferente do esperado"
-
-    logger.info(
-        "DATA PASSADA VÁLIDA | espera=%.1f",
-        espera_passada,
-    )
-
-    retry_invalido = calcular_espera_retry_after_data(
-        "amanhã as 15",
-        agora_apos_retry,
-    )
-
-    assert retry_invalido is None, "Data inválida deveria retornar None"
+    assert interpretar_retry_after("aguardar", agora) is None
 
     logger.info(
-        "DATA INVÁLIDA VALIDADA | espera=%s",
-        retry_invalido,
+        "INTERPRETAÇÃO DOS DOIS FORMATOS VALIDADA",
     )
-    
 
 
 if __name__=="__main__":
