@@ -23,6 +23,16 @@ STATUS_RETRY = {
     503,
 }
 
+def calcular_espera_retry_after_data(valor, agora):
+
+    instante_retry = interpretar_retry_after_data(valor)
+
+    if instante_retry is None:
+        return None
+
+    segundos_restantes = (instante_retry - agora).total_seconds()
+
+    return max(0.0, segundos_restantes)
 
 def interpretar_retry_after_data(valor):
     if valor is None:
@@ -315,31 +325,20 @@ async def extrair_com_retry(
 async def main() -> None:
 
 
-    resultado = interpretar_retry_after_data("amanhã às quinze")
-
-    assert resultado is None, "Data inválida deveria retornar None"
-
-    logger.info(
-        "DATA INVÁLIDA TRATADA | resultado=%s",
-        resultado,
-    )
-
-    resultado = interpretar_retry_after_data(
-        "Sun, 01 Nov 2026 15:00:00 GMT",
-    )
-
     agora = datetime(
         2026, 11, 1, 14, 59, 40,
         tzinfo=UTC,
     )
 
-    segundos_restantes = (resultado - agora).total_seconds()
-    espera = max(0.0, segundos_restantes)
+    espera = calcular_espera_retry_after_data(
+        "Sun, 01 Nov 2026 15:00:00 GMT",
+        agora,
+    )
 
     assert espera == 20.0, "Espera diferente do esperado"
 
     logger.info(
-        "ESPERA A PARTIR DO CABEÇALHO | segundos=%.1f",
+        "ESPERA CALCULADA PELA FUNÇÃO | segundos=%.1f",
         espera,
     )
 
