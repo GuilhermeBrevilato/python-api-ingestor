@@ -323,24 +323,36 @@ async def extrair_com_retry(
 
 
 async def main() -> None:
-
-
-    agora = datetime(
-        2026, 11, 1, 14, 59, 40,
+    
+    agora_apos_retry = datetime(
+        2026, 11, 1, 15, 0, 5,
         tzinfo=UTC,
     )
 
-    espera = calcular_espera_retry_after_data(
+    espera_passada = calcular_espera_retry_after_data(
         "Sun, 01 Nov 2026 15:00:00 GMT",
-        agora,
+        agora_apos_retry,
     )
 
-    assert espera == 20.0, "Espera diferente do esperado"
+    assert espera_passada == 0.0, "Espera diferente do esperado"
 
     logger.info(
-        "ESPERA CALCULADA PELA FUNÇÃO | segundos=%.1f",
-        espera,
+        "DATA PASSADA VÁLIDA | espera=%.1f",
+        espera_passada,
     )
+
+    retry_invalido = calcular_espera_retry_after_data(
+        "amanhã as 15",
+        agora_apos_retry,
+    )
+
+    assert retry_invalido is None, "Data inválida deveria retornar None"
+
+    logger.info(
+        "DATA INVÁLIDA VALIDADA | espera=%s",
+        retry_invalido,
+    )
+    
 
 
 if __name__=="__main__":
