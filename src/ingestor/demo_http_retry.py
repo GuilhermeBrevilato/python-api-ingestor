@@ -328,17 +328,19 @@ async def main() -> None:
         "Sun, 01 Nov 2026 15:00:00 GMT",
     )
 
-    esperado = datetime(
-        2026, 11, 1, 15, 0, 0,
-
+    agora = datetime(
+        2026, 11, 1, 14, 59, 40,
         tzinfo=UTC,
     )
 
-    assert resultado == esperado, "Data interpretada diferente do esperado"
+    segundos_restantes = (resultado - agora).total_seconds()
+    espera = max(0.0, segundos_restantes)
+
+    assert espera == 20.0, "Espera diferente do esperado"
 
     logger.info(
-        "DATA VÁLIDA INTERPRETADA | resultado=%s",
-        resultado,
+        "ESPERA A PARTIR DO CABEÇALHO | segundos=%.1f",
+        espera,
     )
 
 
