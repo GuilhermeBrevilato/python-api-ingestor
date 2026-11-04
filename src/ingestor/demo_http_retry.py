@@ -71,6 +71,9 @@ def interpretar_retry_after(
 
     return calcular_espera_retry_after_data(valor, agora)
 
+def agora_utc():
+    return datetime.now(UTC)
+
 async def testar_cenario(
         status_planejados, 
         chamadas_esperadas, 
@@ -93,6 +96,12 @@ async def testar_cenario(
         logger.info(
             "ESPERA SIMULADA | segundos=%.2f",
             segundos,
+        )
+
+    def relogio_fixo():
+        return datetime(
+            2026, 11, 1, 14, 59, 40,
+            tzinfo=UTC,
         )
 
     def simular_api(
@@ -172,6 +181,7 @@ async def testar_cenario(
                 "https://api.exemplo.test/transacoes",
                 aguardar=simular_espera,
                 sortear=escolher_limite_superior,
+                relogio=relogio_fixo,
             )
             logger.info(
                 "CONSULTAS CONCLUIDAS | dados=%s",
@@ -234,7 +244,8 @@ async def extrair_com_retry(
         url: str,
         aguardar,
         sortear,
-) -> dict | list:
+        relogio=agora_utc,
+    ) -> dict | list:
     total_tentativas = 3
     pausa_inicial = 1
     espera_maxima = 1.5
@@ -283,7 +294,8 @@ async def extrair_com_retry(
             )
 
             valor = erro.response.headers.get("Retry-After")
-            segundos = interpretar_retry_after_segundos(valor)
+            agora = relogio()
+            segundos = interpretar_retry_after(valor, agora)
 
             if segundos is not None:
                 espera = segundos
@@ -335,23 +347,12 @@ async def extrair_com_retry(
 
 async def main() -> None:
     
-    agora = datetime(
-        2026, 11, 1, 14, 59, 40,
-        tzinfo=UTC,
-    )
-
-    assert interpretar_retry_after("10", agora) == 10
-    assert interpretar_retry_after("0", agora) == 0
-
-    assert interpretar_retry_after(
-        "Sun, 01 Nov 2026 15:00:00 GMT",
-        agora,
-    ) == 20.0
-
-    assert interpretar_retry_after("aguardar", agora) is None
-
-    logger.info(
-        "INTERPRETAÇÃO DOS DOIS FORMATOS VALIDADA",
+    await testar_cenario(
+        status_planejados=[429, 200],
+        chamadas_esperadas=[429, 200],
+        deve_falhar=False,
+        retry_after="Sun, 01 Nov 2026 15:00:00 GMT",
+        esperas_esperadas=[20.0],
     )
 
 
