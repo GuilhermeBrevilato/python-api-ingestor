@@ -67,7 +67,7 @@ def interpretar_retry_after_segundos(valor):
 def interpretar_retry_after(
         valor: str,
         agora: datetime,
-) -> int:
+) -> int | float | None:
     segundos = interpretar_retry_after_segundos(valor)
 
     if segundos is not None:
