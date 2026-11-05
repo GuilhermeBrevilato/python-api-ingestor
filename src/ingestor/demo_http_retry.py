@@ -32,7 +32,11 @@ def calcular_espera_retry_after_data(valor, agora):
 
     segundos_restantes = (instante_retry - agora).total_seconds()
 
-    return max(0.0, segundos_restantes)
+    # Data vencida ou igual a agora: o valor não é confiável; usa backoff com jitter.
+    if segundos_restantes <= 0:
+        return None
+
+    return segundos_restantes
 
 def interpretar_retry_after_data(valor):
     if valor is None:
@@ -353,6 +357,14 @@ async def main() -> None:
         deve_falhar=False,
         retry_after="Sun, 01 Nov 2026 15:00:00 GMT",
         esperas_esperadas=[20.0],
+    )
+
+    await testar_cenario(
+        status_planejados=[429, 200],
+        chamadas_esperadas=[429, 200],
+        deve_falhar=False,
+        retry_after="Sun, 01 Nov 2026 14:55:00 GMT",
+        esperas_esperadas=[1.0],
     )
 
 
