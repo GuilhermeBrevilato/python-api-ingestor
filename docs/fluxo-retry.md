@@ -29,8 +29,7 @@ flowchart TD
     L --> O["await aguardar(espera)"]
     N --> O
     O -->|"próxima tentativa"| A
-    class M,Z novo
-    classDef novo fill:#FAEEDA,stroke:#BA7517,color:#633806
+    
 ```
 
 ## Nível micro: como o header vira segundos (`interpretar_retry_after`)
@@ -50,12 +49,11 @@ flowchart TD
     G --> H{"restante > 0?"}
     H -->|"não: data vencida"| R0
     H -->|"sim"| R2(["devolve restante<br/>em segundos, float"])
-    class H novo
-    classDef novo fill:#FAEEDA,stroke:#BA7517,color:#633806
+    
 ```
 
 ## Decisões registradas
 
 - `Retry-After: 0` em segundos é instrução explícita do servidor: honrar.
 - Data vencida não é "tente agora": é valor velho ou relógio divergente. Devolve `None` e o macro usa backoff com jitter, que evita retries sincronizados.
-- Orçamento (10B): limita a espera pedida pelo Retry-After. O backoff já tem teto próprio (`espera_maxima`).
+- Orçamento: a espera pedida pelo `Retry-After` é limitada pelo parâmetro `orcamento_espera`, com padrão de 600 segundos. Pedido acima disso interrompe a extração com `EsperaExcedeOrcamento`. O backoff tem teto próprio (`espera_maxima`).
