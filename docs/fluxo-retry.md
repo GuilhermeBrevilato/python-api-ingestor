@@ -1,7 +1,6 @@
-# Fluxo do cliente HTTP com retry
+# Fluxo de decisão do cliente HTTP: quando repetir, quanto esperar e quando desistir.
 
-Referência do Bloco 1. Atualize este arquivo no mesmo commit que mudar o código.
-Caixas em âmbar = mudanças da unidade 10B (a implementar).
+# Caixas em âmbar = mudanças da unidade 10B (a implementar).
 
 ## Nível macro: a decisão de repetir (`extrair_com_retry`)
 
