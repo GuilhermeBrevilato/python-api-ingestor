@@ -13,3 +13,6 @@ class ExtractionError(DataPipelineError):
 
 class StorageError(DataPipelineError):
     pass
+
+class EsperaExcedeOrcamento(ExtractionError):
+    pass
