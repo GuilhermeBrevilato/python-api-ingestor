@@ -11,3 +11,6 @@ __pycache__/
 
 # Arquivos do macOS
 .DS_Store
+
+# Dados salvos pelo pipeline ao rodar
+/data
