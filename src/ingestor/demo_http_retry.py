@@ -1,10 +1,12 @@
 import asyncio
 import json
 import logging
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 
 import httpx
+
+from ingestor.exceptions import EsperaExcedeOrcamento
 
 logging.basicConfig(
     level=logging.INFO,
@@ -32,7 +34,11 @@ def calcular_espera_retry_after_data(valor, agora):
 
     segundos_restantes = (instante_retry - agora).total_seconds()
 
-    return max(0.0, segundos_restantes)
+    # Data vencida ou igual a agora: o valor não é confiável; usa backoff com jitter.
+    if segundos_restantes <= 0:
+        return None
+
+    return segundos_restantes
 
 def interpretar_retry_after_data(valor):
     if valor is None:
@@ -63,7 +69,7 @@ def interpretar_retry_after_segundos(valor):
 def interpretar_retry_after(
         valor: str,
         agora: datetime,
-) -> int:
+) -> int | float | None:
     segundos = interpretar_retry_after_segundos(valor)
 
     if segundos is not None:
@@ -210,6 +216,18 @@ async def testar_cenario(
 
             logger.info("FALHA ESPERADA RECEBIDA | motivo=JSON inválido")
 
+        except EsperaExcedeOrcamento as erro:
+            if not deve_falhar:
+                raise
+
+            assert excecao_esperada is not None, "Informe a excecao esperada"
+            assert isinstance(erro, excecao_esperada), "Excecao diferente do esperado"
+
+            logger.info(
+                "FALHA ESPERADA RECEBIDA | motivo=%s",
+                erro,
+            )
+
         except (httpx.ReadTimeout, httpx.ConnectTimeout) as erro:
             if not deve_falhar:
                 raise
@@ -245,6 +263,7 @@ async def extrair_com_retry(
         aguardar,
         sortear,
         relogio=agora_utc,
+        orcamento_espera=600,
     ) -> dict | list:
     total_tentativas = 3
     pausa_inicial = 1
@@ -298,6 +317,20 @@ async def extrair_com_retry(
             segundos = interpretar_retry_after(valor, agora)
 
             if segundos is not None:
+
+                if segundos > orcamento_espera:
+                    logger.error(
+                        "ESPERA SOLICITADA EXCEDE O LIMITE INTERNO | espera_solicitada=%.2f | limite_interno=%d",
+                        segundos,
+                        orcamento_espera,
+                    )
+
+                    raise EsperaExcedeOrcamento(
+                        f"Servidor pediu {segundos:.2f} s de espera; "
+                        f"orçamento é {orcamento_espera} s",
+                        source=url,
+                    ) from erro
+
                 espera = segundos
                 origem = "Retry-After"
             else:
@@ -353,6 +386,31 @@ async def main() -> None:
         deve_falhar=False,
         retry_after="Sun, 01 Nov 2026 15:00:00 GMT",
         esperas_esperadas=[20.0],
+    )
+
+    await testar_cenario(
+        status_planejados=[429, 200],
+        chamadas_esperadas=[429, 200],
+        deve_falhar=False,
+        retry_after="Sun, 01 Nov 2026 14:55:00 GMT",
+        esperas_esperadas=[1.0],
+    )
+
+    await testar_cenario(
+        status_planejados=[429, 200],
+        chamadas_esperadas=[429],
+        deve_falhar=True,
+        excecao_esperada= EsperaExcedeOrcamento,
+        retry_after="601",
+        esperas_esperadas=[],
+    )
+
+    await testar_cenario(
+        status_planejados=[429, 200],
+        chamadas_esperadas=[429, 200],
+        deve_falhar=False,
+        retry_after="600",
+        esperas_esperadas=[600.0],
     )
 
 
