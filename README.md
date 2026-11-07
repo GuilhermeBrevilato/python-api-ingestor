@@ -41,3 +41,18 @@ foram feitas e quanto tempo o cliente esperou.
 
 - [Fluxo de decisão do cliente HTTP](docs/fluxo-retry.md): quando repetir, quanto esperar
   e quando desistir.
+
+## Como o trabalho é organizado
+
+As tarefas são planejadas em sprints de uma semana no Jira (projeto ING).
+Toda mudança segue o mesmo caminho: card no Jira → branch → commits → pull request → merge no main.
+
+A chave do card aparece em cada etapa, e o Jira liga tudo automaticamente ao card:
+
+| Onde | Padrão | Exemplo |
+|---|---|---|
+| Branch | `tipo/CHAVE-descricao` | `docs/ING-6-convencao-jira` |
+| Commit | `tipo(CHAVE): descrição` | `docs(ING-6): registra a convenção de nomes` |
+| Pull request | `CHAVE: descrição` | `ING-6: registra a convenção de nomes` |
+
+Tipos usados: `feat`, `fix`, `refactor`, `docs`, `chore`, `build` e `test`.
