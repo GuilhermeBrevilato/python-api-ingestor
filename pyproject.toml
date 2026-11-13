@@ -5,3 +5,8 @@ requires-python = ">=3.11"
 dependencies = [
     "httpx",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
