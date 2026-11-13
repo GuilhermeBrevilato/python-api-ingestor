@@ -14,3 +14,6 @@ __pycache__/
 
 # Dados salvos pelo pipeline ao rodar
 /data
+
+#Metadados gerados pelo pip install
+*.egg-info/
