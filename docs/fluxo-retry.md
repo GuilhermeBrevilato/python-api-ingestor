@@ -1,5 +1,7 @@
 # Fluxo de decisão do cliente HTTP: quando repetir, quanto esperar e quando desistir.
 
+Código: `src/ingestor/cliente_http.py`. Testes: `tests/test_retry.py`.
+
 # Caixas em âmbar = mudanças da unidade 10B (a implementar).
 
 ## Nível macro: a decisão de repetir (`extrair_com_retry`)

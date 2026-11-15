@@ -9,7 +9,7 @@ Diante de uma falha, o cliente decide:
 - quanto tempo esperar antes da nova tentativa;
 - quando desistir.## O que é
 
-## Como rodar
+## Como rodar os testes
 Requer Python 3.11 ou superior.
 
 ```bash
@@ -17,12 +17,18 @@ git clone https://github.com/GuilhermeBrevilato/python-api-ingestor.git
 cd python-api-ingestor
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e .
-python -m ingestor.demo_http_retry
+pip install -e ".[dev]"
+pytest
 ```
 
-A demo roda quatro cenários de falha simulada e confere, em cada um, quantas chamadas
-foram feitas e quanto tempo o cliente esperou.
+Os testes simulam a API, o relógio e a espera: rodam em menos de um segundo, sem internet.
+Cada cenário confere quantas chamadas o cliente fez e quanto tempo esperou.
+
+## Estrutura
+
+- `src/ingestor/cliente_http.py`: o cliente HTTP, com as regras de retry e espera.
+- `src/ingestor/exceptions.py`: os erros próprios do projeto.
+- `tests/test_retry.py`: os cenários de teste do retry.
 
 ## O que já funciona
 
