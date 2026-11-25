@@ -57,7 +57,7 @@ def test_retry_after_em_data_espera_ate_o_instante_pedido():
     # Conferir
     assert dados == DADOS_OK
     assert chamadas == [429, 200]
-    assert esperas == [21.0]
+    assert esperas == [20.0]
 
 
 def test_retry_after_com_data_vencida_usa_backoff():
